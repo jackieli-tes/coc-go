@@ -1,9 +1,12 @@
-import { LanguageClient, window } from 'coc.nvim'
-import fs from 'fs'
 import path from 'path'
-import { GOMODIFYTAGS, GOPLAY, GOPLS, GOTESTS, IMPL, TOOLS } from './binaries'
-import checkLatestTag from './utils/checktag'
+import fs from 'fs'
+import { LanguageClient, window } from 'coc.nvim'
 import { installGoBin, runGoTool } from './utils/tools'
+import checkLatestTag from './utils/checktag'
+import { withProgress } from './utils/ui'
+import { getState, setState } from './utils/config'
+
+import { GOMODIFYTAGS, GOPLAY, GOPLS, GOTESTS, IMPL, TOOLS } from './binaries'
 import { compareVersions, isValidVersion } from './utils/versions'
 
 
@@ -23,37 +26,62 @@ export async function installGopls(client: LanguageClient): Promise<void> {
   }
 }
 
+const checkInterval = 24 * 60 * 60 * 1000
+
+async function shouldCheckGopls(): Promise<boolean> {
+  const now = new Date().getTime()
+  const last = await getState<number>('gopls:last-check')
+
+  if (last - (now - checkInterval) < 0) {
+    await setState('gopls:last-check', new Date().getTime())
+    return true
+  }
+  return false
+}
+
 export async function checkGopls(client: LanguageClient, mode: 'ask' | 'inform' | 'install'): Promise<void> {
 
-  const [current, latest] = await Promise.all([
-    goplsVersion(),
-    checkLatestTag("golang/tools", /^gopls\//),
-  ])
-
   try {
-    let install = false
-    switch (compareVersions(latest, current)) {
-      case 0:
-        window.showMessage(`[gopls] up-to-date: ${current}`, 'more')
-        break
-      case 1:
-        switch (mode) {
-          case 'install':
-            install = true
-            break
-          case 'ask':
-            install = await window.showPrompt(`[gopls] Install update? ${current} => ${latest}`)
-            break
-          case 'inform':
-            window.showMessage(`[gopls] update available: ${current} => ${latest}`)
-            break
-        }
-
-        break
-      case -1:
-        window.showMessage(`[gopls] current: ${current} | latest: ${latest}`, 'more')
-        break
+    if (!(await shouldCheckGopls())) {
+      return
     }
+
+    let install = false
+
+    await withProgress('Checking for new gopls version', async () => {
+      const [current, latest] = await Promise.all([
+        goplsVersion(),
+        checkLatestTag("golang/tools", /^gopls\//),
+      ])
+
+      if (!isValidVersion(current) || !isValidVersion(latest)) {
+        window.showMessage('checking for a new gopls version failed', 'warning')
+        return
+      }
+
+      switch (compareVersions(latest, current)) {
+        case 0:
+          window.showMessage(`[gopls] up-to-date: ${current}`, 'more')
+          break
+        case 1:
+          switch (mode) {
+            case 'install':
+              install = true
+              break
+            case 'ask':
+              install = await window.showPrompt(`[gopls] Install update? ${current} => ${latest}`)
+              break
+            case 'inform':
+              window.showMessage(`[gopls] update available: ${current} => ${latest}`)
+              break
+          }
+
+          break
+        case -1:
+          window.showMessage(`[gopls] current: ${current} | latest: ${latest}`, 'more')
+          break
+      }
+    })
 
     if (install) {
       await installGopls(client)
@@ -109,4 +137,3 @@ export async function installTools(): Promise<void> {
     await installGoBin(tool, true)
   }
 }
-

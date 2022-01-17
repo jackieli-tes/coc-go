@@ -1,6 +1,6 @@
 {
   "name": "coc-go",
-  "version": "v1.0.0",
+  "version": "1.1.0",
   "description": "gopls extension for coc",
   "author": "Josa Gesell <josa@gesell.me>",
   "license": "MIT",
@@ -625,9 +625,9 @@
           }
         },
         "go.checkForUpdates": {
-          "description": "[EXPERIMENTAL] Check for gopls updates on start.",
+          "description": "Check for gopls updates on start.",
           "type": "string",
-          "default": "disabled",
+          "default": "install",
           "enum": [
             "disabled",
             "inform",
@@ -638,6 +638,11 @@
       }
     },
     "commands": [
+      {
+        "title": "Run gopls.tidy LSP command",
+        "category": "Go",
+        "command": "go.gopls.tidy"
+      },
       {
         "title": "Generate interface stubs",
         "category": "Go",
@@ -742,21 +747,6 @@
         "title": "Print extension version",
         "category": "Go",
         "command": "go.version"
-      },
-      {
-        "title": "Run gopls.tidy LSP command",
-        "category": "Go",
-        "command": "go.gopls.tidy"
-      },
-      {
-        "title": "Run test func on current line, or open list of all tests",
-        "category": "Go",
-        "command": "go.gopls.runTests"
-      },
-      {
-        "title": "List known packages",
-        "category": "Go",
-        "command": "go.gopls.listKnownPackages"
       }
     ],
     "snippets": [

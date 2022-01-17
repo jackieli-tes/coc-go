@@ -21,6 +21,7 @@ Additional to commands provided by gopls, this extensions provides these command
 
 | Key                             | Description                                        |
 |---------------------------------|----------------------------------------------------|
+| **`go.gopls.tidy`**             | Run gopls.tidy LSP command                         |
 | **`go.impl.cursor`**            | Generate interface stubs                           |
 | **`go.install.gomodifytags`**   | Install / update gomodifytags                      |
 | **`go.install.goplay`**         | Install / update goplay                            |
@@ -42,9 +43,6 @@ Additional to commands provided by gopls, this extensions provides these command
 | **`go.test.generate.function`** | Generate unit tests for current function           |
 | **`go.test.toggle`**            | Toggle test file                                   |
 | **`go.version`**                | Print extension version                            |
-| **`go.gopls.tidy`**             | Run gopls.tidy LSP command                         |
-| **`go.gopls.runTests`**         | Run gopls.run_tests LSP command. If test or benchmark if found in current line, run it, else show list of tests and benchmarks in current buffer                         |
-| **`go.gopls.listKnownPackages`** | Run gopls.list_known_packages LSP command and put in a list, default action is to add import to current file |
 
 ### Examples
 
@@ -80,7 +78,7 @@ installed.
 
 | Key                                | Description                                                                                                                                                                                                                                                         | Default           |
 |------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
-| **`go.checkForUpdates`**           | **EXPERIMENTAL** Check for gopls updates on start.                                                                                                                                                                                                                  | disabled          |
+| **`go.checkForUpdates`**           | Check for gopls updates on start.                                                                                                                                                                                                                                   | install           |
 | **`go.disable`**                   | Disable gopls features                                                                                                                                                                                                                                              | {}                |
 | ‣ `completion`                     | Disable completion feature (Change requires `:CocRestart`)                                                                                                                                                                                                          | false             |
 | ‣ `diagnostics`                    | Disable handle diagnostics (Change requires `:CocRestart`)                                                                                                                                                                                                          | false             |
