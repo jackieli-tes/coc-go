@@ -199,7 +199,8 @@ export class GoKnownPackagesList implements IList {
     )
   }
 
-  public async loadItems(_context: ListContext): Promise<ListItem[]> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+  public async loadItems(_: ListContext): Promise<ListItem[]> {
     const doc = await activeTextDocument()
     const result: {
       Packages: string[]
