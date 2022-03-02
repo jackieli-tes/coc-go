@@ -39,7 +39,7 @@ import {
   generateTestsFunction,
   toogleTests,
 } from "./utils/tests"
-import { commandExists, goBinPath, installGoBin } from "./utils/tools"
+import { commandExists, goBinPath, installGoBin, runBin } from "./utils/tools"
 
 const restartConfigs = [
   "go.goplsArgs",
@@ -128,8 +128,10 @@ async function registerGopls(context: ExtensionContext): Promise<void> {
     // restart gopls if options changed
     workspace.onDidChangeConfiguration(async (e) => {
       if (restartConfigs.find((k) => e.affectsConfiguration(k))) {
-        await client.stop()
-        client.restart()
+        // const { logger } = context
+        // logger.info('affected config', restartConfigs.find((k) => e.affectsConfiguration(k)))
+        // await client.stop()
+        // client.restart()
       }
     }),
 
@@ -243,6 +245,33 @@ async function registerLspCommands(context: ExtensionContext): Promise<void> {
       goplsListKnownPackages
     ),
     listManager.registerList(new GoTestsList()),
-    listManager.registerList(new GoKnownPackagesList())
+    listManager.registerList(new GoKnownPackagesList()),
+
+    // autocmd for current package
+    workspace.registerAutocmd({
+      event: ['BufEnter'],
+      // request: true,
+      callback: async () => {
+        const pkg = await currentPackage()
+        const bufnr = await workspace.nvim.call('bufnr', ['%'])
+        const buffer = workspace.nvim.createBuffer(bufnr)
+        buffer.setVar('coc_current_package', pkg, true)
+        workspace.nvim.call('coc#util#do_autocmd', ['CocStatusChange'], true)
+      },
+    })
   )
+}
+
+async function currentPackage(): Promise<string> {
+  try {
+    await activeTextDocument()
+  } catch {
+    return ""
+  }
+  // TODO: preferrably use lsp to query, running `go list` is expensive
+  const fn = await workspace.nvim.call('expand', '%:p:h') as string
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  const [_, out] = await runBin('go', ['list', '-f', '{{.Name}}', fn])
+  // const [_, out] = await runBin('go', ['list', '-f', '{{.ImportPath}}', fn])
+  return (out as string).trim()
 }
