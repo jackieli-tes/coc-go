@@ -2,7 +2,7 @@
 
 const fs = require("fs")
 
-const CMD_LINE_EXPR = /^\s*"(go\..+)",$/
+const CMD_LINE_EXPR = /"(go\..+)",/
 
 async function run() {
   const contents = fs.readFileSync("src/extension.ts", "utf8").split("\n")
@@ -18,7 +18,7 @@ async function run() {
     .sort((a, b) => a.localeCompare(b))
 
   pkg.contributes.commands = commandKeys
-    .map(key => {
+    .map((key) => {
       return (
         pkg.contributes.commands.find(({ command }) => command === key) || {
           title: key
@@ -28,20 +28,20 @@ async function run() {
             .replace(/^(\w+) (generate|add|remove|toggle)/, "$2 $1")
             .replace(/ (file|line)$/, " in current $1")
             .replace(/^(install)/, "$1 / update")
-            .replace(/^./, s => s.toUpperCase()),
+            .replace(/^./, (s) => s.toUpperCase()),
           category: "Go",
-          command: key
+          command: key,
         }
       )
     })
-    .filter(({ command }) => commandKeys.some(key => key === command))
+    .filter(({ command }) => commandKeys.some((key) => key === command))
 
   pkg.activationEvents = [
     "onLanguage:go",
     "onLanguage:gomod",
     ...commandKeys
-      .filter(key => key.match(/^go\.(install\..+|version)$/))
-      .map(key => `onCommand:${key}`)
+      .filter((key) => key.match(/^go\.(install\..+|version)$/))
+      .map((key) => `onCommand:${key}`),
   ]
 
   fs.writeFileSync("package.json", JSON.stringify(pkg, "", "  ") + "\n")

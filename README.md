@@ -19,30 +19,36 @@ See [`gopls`](https://github.com/golang/tools/blob/master/gopls/README.md)
 
 Additional to commands provided by gopls, this extensions provides these commands:
 
-| Key                             | Description                                        |
-|---------------------------------|----------------------------------------------------|
-| **`go.gopls.tidy`**             | Run gopls.tidy LSP command                         |
-| **`go.impl.cursor`**            | Generate interface stubs                           |
-| **`go.install.gomodifytags`**   | Install / update gomodifytags                      |
-| **`go.install.goplay`**         | Install / update goplay                            |
-| **`go.install.gopls`**          | Install / update gopls                             |
-| **`go.install.gotests`**        | Install / update gotests                           |
-| **`go.install.impl`**           | Install / update impl                              |
-| **`go.install.tools`**          | Install / update all tools                         |
-| **`go.playground`**             | Run on go playground                               |
-| **`go.tags.add`**               | Add tags to struct fields                          |
-| **`go.tags.add.line`**          | Add tags to struct field in current line           |
-| **`go.tags.add.prompt`**        | Add tags to struct fields (prompt)                 |
-| **`go.tags.clear`**             | Remove all tags from struct fields                 |
-| **`go.tags.clear.line`**        | Remove all tags from struct fields in current line |
-| **`go.tags.remove`**            | Remove tags from struct fields                     |
-| **`go.tags.remove.line`**       | Remove tags from struct field in current line      |
-| **`go.tags.remove.prompt`**     | Remove tags from struct fields (prompt)            |
-| **`go.test.generate.exported`** | Generate unit tests for exported functions in file |
-| **`go.test.generate.file`**     | Generate unit tests for file                       |
-| **`go.test.generate.function`** | Generate unit tests for current function           |
-| **`go.test.toggle`**            | Toggle test file                                   |
-| **`go.version`**                | Print extension version                            |
+| Key                              | Description                     |
+|----------------------------------|---------------------------------|
+| **`go.gopls.listKnownPackages`** | Gopls listKnownPackages         |
+| **`go.gopls.runTests`**          | Gopls runTests                  |
+| **`go.gopls.tidy`**              | Gopls tidy                      |
+| **`go.goplsArgs`**               | GoplsArgs                       |
+| **`go.goplsOptions`**            | GoplsOptions                    |
+| **`go.goplsPath`**               | GoplsPath                       |
+| **`go.goplsUseDaemon`**          | GoplsUseDaemon                  |
+| **`go.impl.cursor`**             | Impl cursor                     |
+| **`go.install.gomodifytags`**    | Install / update gomodifytags   |
+| **`go.install.goplay`**          | Install / update goplay         |
+| **`go.install.gopls`**           | Install / update gopls          |
+| **`go.install.gotests`**         | Install / update gotests        |
+| **`go.install.impl`**            | Install / update impl           |
+| **`go.install.tools`**           | Install / update tools          |
+| **`go.playground`**              | Playground                      |
+| **`go.tags.add`**                | Add tags                        |
+| **`go.tags.add.line`**           | Add tags in current line        |
+| **`go.tags.add.prompt`**         | Add tags prompt                 |
+| **`go.tags.clear`**              | Remove all tags                 |
+| **`go.tags.clear.line`**         | Remove all tags in current line |
+| **`go.tags.remove`**             | Remove tags                     |
+| **`go.tags.remove.line`**        | Remove tags in current line     |
+| **`go.tags.remove.prompt`**      | Remove tags prompt              |
+| **`go.test.generate.exported`**  | Generate test exported          |
+| **`go.test.generate.file`**      | Generate test in current file   |
+| **`go.test.generate.function`**  | Generate test function          |
+| **`go.test.toggle`**             | Toggle test                     |
+| **`go.version`**                 | Version                         |
 
 ### Examples
 
@@ -106,8 +112,8 @@ installed.
 | ‣ `gofumpt`                        | gofumpt indicates if we should run gofumpt formatting.                                                                                                                                                                                                              | false             |
 | ‣ `hoverKind`                      | hoverKind controls the information that appears in the hover text.                                                                                                                                                                                                  | FullDocumentation |
 | ‣ `importShortcut`                 | importShortcut specifies whether import statements should link to documentation or go to definitions.                                                                                                                                                               | Both              |
-| ‣ `linkTarget`                     | linkTarget controls where documentation links go.                                                                                                                                                                                                                   | pkg.go.dev        |
 | ‣ `linksInHover`                   | linksInHover toggles the presence of links to documentation in hover.                                                                                                                                                                                               | true              |
+| ‣ `linkTarget`                     | linkTarget controls where documentation links go.                                                                                                                                                                                                                   | pkg.go.dev        |
 | ‣ `local`                          | local is the equivalent of the `goimports -local` flag, which puts imports beginning with this string after third-party packages.                                                                                                                                   |                   |
 | ‣ `matcher`                        | **This is an advanced setting and should not be configured by most `gopls` users.**  matcher sets the algorithm that is used when calculating completion candidates.                                                                                                | Fuzzy             |
 | ‣ `memoryMode`                     | **This setting is experimental and may be deleted.**  memoryMode controls the tradeoff `gopls` makes between memory usage and correctness.                                                                                                                          | Normal            |
