@@ -338,8 +338,7 @@
                 },
                 "useany": {
                   "type": "boolean",
-                  "description": "check for constraints that could be simplified to \"any\"",
-                  "default": true
+                  "description": "check for constraints that could be simplified to \"any\"\n**Disabled by default. Enable it by setting `\"analyses\": {\"useany\": true}`.**"
                 },
                 "fillreturns": {
                   "type": "boolean",
@@ -353,7 +352,7 @@
                 },
                 "noresultvalues": {
                   "type": "boolean",
-                  "description": "suggested fixes for \"no result values expected\"\nThis checker provides suggested fixes for type errors of the\ntype \"no result values expected\". For example:\n\tfunc z() { return nil }\nwill turn into\n\tfunc z() { return }",
+                  "description": "suggested fixes for unexpected return values\nThis checker provides suggested fixes for type errors of the\ntype \"no result values expected\" or \"too many return values\".\nFor example:\n\tfunc z() { return nil }\nwill turn into\n\tfunc z() { return }",
                   "default": true
                 },
                 "undeclaredname": {
@@ -365,6 +364,11 @@
                   "type": "boolean",
                   "description": "note incomplete struct initializations\nThis analyzer provides diagnostics for any struct literals that do not have\nany fields initialized. Because the suggested fix for this analysis is\nexpensive to compute, callers should compute it separately, using the\nSuggestedFix function below.",
                   "default": true
+                },
+                "stubmethods": {
+                  "type": "boolean",
+                  "description": "stub methods analyzer\nThis analyzer generates method stubs for concrete types\nin order to implement a target interface",
+                  "default": true
                 }
               }
             },
@@ -375,7 +379,7 @@
                   "type": "boolean"
                 }
               },
-              "description": "**This setting is experimental and may be deleted.**\n\nannotations specifies the various kinds of optimization diagnostics\nthat should be reported by the gc_details command.\n\nCan contain any of:\n\n* `\"bounds\"` controls bounds checking diagnostics.\n\n* `\"escape\"` controls diagnostics about escape choices.\n\n* `\"inline\"` controls diagnostics about inlining choices.\n\n* `\"nil\"` controls nil checks.\n"
+              "description": "**This setting is experimental and may be deleted.**\n\nannotations specifies the various kinds of optimization diagnostics\nthat should be reported by the gc_details command.\n\nCan contain any of:\n\n* `\"bounds\"` controls bounds checking diagnostics.\n* `\"escape\"` controls diagnostics about escape choices.\n* `\"inline\"` controls diagnostics about inlining choices.\n* `\"nil\"` controls nil checks.\n"
             },
             "buildFlags": {
               "type": "array",
@@ -486,7 +490,7 @@
                 "SynopsisDocumentation"
               ],
               "default": "FullDocumentation",
-              "description": "hoverKind controls the information that appears in the hover text.\nSingleLine and Structured are intended for use only by authors of editor plugins.\n\nMust be one of:\n\n* `\"FullDocumentation\"`\n* `\"NoDocumentation\"`\n* `\"SingleLine\"`\n* `\"Structured\"` is an experimental setting that returns a structured hover format.\nThis format separates the signature from the documentation, so that the client\ncan do more manipulation of these fields.\\\nThis should only be used by clients that support this behavior.\n\n* `\"SynopsisDocumentation\"`\n"
+              "description": "hoverKind controls the information that appears in the hover text.\nSingleLine and Structured are intended for use only by authors of editor plugins.\n\nMust be one of:\n\n* `\"FullDocumentation\"`\n* `\"NoDocumentation\"`\n* `\"SingleLine\"`\n* `\"Structured\"` is an experimental setting that returns a structured hover format.\nThis format separates the signature from the documentation, so that the client\ncan do more manipulation of these fields.\\\nThis should only be used by clients that support this behavior.\n* `\"SynopsisDocumentation\"`\n"
             },
             "importShortcut": {
               "type": "string",
@@ -530,7 +534,7 @@
                 "Normal"
               ],
               "default": "Normal",
-              "description": "**This setting is experimental and may be deleted.**\n\nmemoryMode controls the tradeoff `gopls` makes between memory usage and\ncorrectness.\n\nValues other than `Normal` are untested and may break in surprising ways.\n\nMust be one of:\n\n* `\"DegradeClosed\"`: In DegradeClosed mode, `gopls` will collect less information about\npackages without open files. As a result, features like Find\nReferences and Rename will miss results in such packages.\n\n* `\"Normal\"`\n"
+              "description": "**This setting is experimental and may be deleted.**\n\nmemoryMode controls the tradeoff `gopls` makes between memory usage and\ncorrectness.\n\nValues other than `Normal` are untested and may break in surprising ways.\n\nMust be one of:\n\n* `\"DegradeClosed\"`: In DegradeClosed mode, `gopls` will collect less information about\npackages without open files. As a result, features like Find\nReferences and Rename will miss results in such packages.\n* `\"Normal\"`\n"
             },
             "semanticTokens": {
               "type": "boolean",
@@ -550,7 +554,7 @@
                 "FastFuzzy",
                 "Fuzzy"
               ],
-              "default": "Fuzzy",
+              "default": "FastFuzzy",
               "description": "**This is an advanced setting and should not be configured by most `gopls` users.**\n\nsymbolMatcher sets the algorithm that is used when finding workspace symbols.\n\nMust be one of:\n\n* `\"CaseInsensitive\"`\n* `\"CaseSensitive\"`\n* `\"FastFuzzy\"`\n* `\"Fuzzy\"`\n"
             },
             "symbolStyle": {
@@ -561,7 +565,7 @@
                 "Package"
               ],
               "default": "Dynamic",
-              "description": "**This is an advanced setting and should not be configured by most `gopls` users.**\n\nsymbolStyle controls how symbols are qualified in symbol responses.\n\nExample Usage:\n\n```json5\n\"gopls\": {\n...\n  \"symbolStyle\": \"Dynamic\",\n...\n}\n```\n\nMust be one of:\n\n* `\"Dynamic\"` uses whichever qualifier results in the highest scoring\nmatch for the given symbol query. Here a \"qualifier\" is any \"/\" or \".\"\ndelimited suffix of the fully qualified symbol. i.e. \"to/pkg.Foo.Field\" or\njust \"Foo.Field\".\n\n* `\"Full\"` is fully qualified symbols, i.e.\n\"path/to/pkg.Foo.Field\".\n\n* `\"Package\"` is package qualified symbols i.e.\n\"pkg.Foo.Field\".\n"
+              "description": "**This is an advanced setting and should not be configured by most `gopls` users.**\n\nsymbolStyle controls how symbols are qualified in symbol responses.\n\nExample Usage:\n\n```json5\n\"gopls\": {\n...\n  \"symbolStyle\": \"Dynamic\",\n...\n}\n```\n\nMust be one of:\n\n* `\"Dynamic\"` uses whichever qualifier results in the highest scoring\nmatch for the given symbol query. Here a \"qualifier\" is any \"/\" or \".\"\ndelimited suffix of the fully qualified symbol. i.e. \"to/pkg.Foo.Field\" or\njust \"Foo.Field\".\n* `\"Full\"` is fully qualified symbols, i.e.\n\"path/to/pkg.Foo.Field\".\n* `\"Package\"` is package qualified symbols i.e.\n\"pkg.Foo.Field\".\n"
             },
             "templateExtensions": {
               "type": "array",
