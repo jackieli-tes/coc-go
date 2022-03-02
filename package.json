@@ -42,14 +42,7 @@
   },
   "activationEvents": [
     "onLanguage:go",
-    "onLanguage:gomod",
-    "onCommand:go.install.gomodifytags",
-    "onCommand:go.install.goplay",
-    "onCommand:go.install.gopls",
-    "onCommand:go.install.gotests",
-    "onCommand:go.install.impl",
-    "onCommand:go.install.tools",
-    "onCommand:go.version"
+    "onLanguage:gomod"
   ],
   "contributes": {
     "rootPatterns": [
@@ -643,114 +636,29 @@
     },
     "commands": [
       {
-        "title": "Run gopls.tidy LSP command",
+        "title": "Gopls listKnownPackages",
         "category": "Go",
-        "command": "go.gopls.tidy"
+        "command": "go.gopls.listKnownPackages"
       },
       {
-        "title": "Generate interface stubs",
+        "title": "GoplsArgs",
         "category": "Go",
-        "command": "go.impl.cursor"
+        "command": "go.goplsArgs"
       },
       {
-        "title": "Install / update gomodifytags",
+        "title": "GoplsOptions",
         "category": "Go",
-        "command": "go.install.gomodifytags"
+        "command": "go.goplsOptions"
       },
       {
-        "title": "Install / update goplay",
+        "title": "GoplsPath",
         "category": "Go",
-        "command": "go.install.goplay"
+        "command": "go.goplsPath"
       },
       {
-        "title": "Install / update gopls",
+        "title": "GoplsUseDaemon",
         "category": "Go",
-        "command": "go.install.gopls"
-      },
-      {
-        "title": "Install / update gotests",
-        "category": "Go",
-        "command": "go.install.gotests"
-      },
-      {
-        "title": "Install / update impl",
-        "category": "Go",
-        "command": "go.install.impl"
-      },
-      {
-        "title": "Install / update all tools",
-        "category": "Go",
-        "command": "go.install.tools"
-      },
-      {
-        "title": "Run on go playground",
-        "category": "Go",
-        "command": "go.playground"
-      },
-      {
-        "title": "Add tags to struct fields",
-        "category": "Go",
-        "command": "go.tags.add"
-      },
-      {
-        "title": "Add tags to struct field in current line",
-        "category": "Go",
-        "command": "go.tags.add.line"
-      },
-      {
-        "title": "Add tags to struct fields (prompt)",
-        "category": "Go",
-        "command": "go.tags.add.prompt"
-      },
-      {
-        "title": "Remove all tags from struct fields",
-        "category": "Go",
-        "command": "go.tags.clear"
-      },
-      {
-        "title": "Remove all tags from struct fields in current line",
-        "category": "Go",
-        "command": "go.tags.clear.line"
-      },
-      {
-        "title": "Remove tags from struct fields",
-        "category": "Go",
-        "command": "go.tags.remove"
-      },
-      {
-        "title": "Remove tags from struct field in current line",
-        "category": "Go",
-        "command": "go.tags.remove.line"
-      },
-      {
-        "title": "Remove tags from struct fields (prompt)",
-        "category": "Go",
-        "command": "go.tags.remove.prompt"
-      },
-      {
-        "title": "Generate unit tests for exported functions in file",
-        "category": "Go",
-        "command": "go.test.generate.exported"
-      },
-      {
-        "title": "Generate unit tests for file",
-        "category": "Go",
-        "command": "go.test.generate.file"
-      },
-      {
-        "title": "Generate unit tests for current function",
-        "category": "Go",
-        "command": "go.test.generate.function"
-      },
-      {
-        "title": "Toggle test file",
-        "category": "Go",
-        "command": "go.test.toggle"
-      },
-      {
-        "title": "Print extension version",
-        "category": "Go",
-        "command": "go.version"
+        "command": "go.goplsUseDaemon"
       }
     ],
     "snippets": [

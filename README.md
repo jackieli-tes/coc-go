@@ -19,30 +19,13 @@ See [`gopls`](https://github.com/golang/tools/blob/master/gopls/README.md)
 
 Additional to commands provided by gopls, this extensions provides these commands:
 
-| Key                             | Description                                        |
-|---------------------------------|----------------------------------------------------|
-| **`go.gopls.tidy`**             | Run gopls.tidy LSP command                         |
-| **`go.impl.cursor`**            | Generate interface stubs                           |
-| **`go.install.gomodifytags`**   | Install / update gomodifytags                      |
-| **`go.install.goplay`**         | Install / update goplay                            |
-| **`go.install.gopls`**          | Install / update gopls                             |
-| **`go.install.gotests`**        | Install / update gotests                           |
-| **`go.install.impl`**           | Install / update impl                              |
-| **`go.install.tools`**          | Install / update all tools                         |
-| **`go.playground`**             | Run on go playground                               |
-| **`go.tags.add`**               | Add tags to struct fields                          |
-| **`go.tags.add.line`**          | Add tags to struct field in current line           |
-| **`go.tags.add.prompt`**        | Add tags to struct fields (prompt)                 |
-| **`go.tags.clear`**             | Remove all tags from struct fields                 |
-| **`go.tags.clear.line`**        | Remove all tags from struct fields in current line |
-| **`go.tags.remove`**            | Remove tags from struct fields                     |
-| **`go.tags.remove.line`**       | Remove tags from struct field in current line      |
-| **`go.tags.remove.prompt`**     | Remove tags from struct fields (prompt)            |
-| **`go.test.generate.exported`** | Generate unit tests for exported functions in file |
-| **`go.test.generate.file`**     | Generate unit tests for file                       |
-| **`go.test.generate.function`** | Generate unit tests for current function           |
-| **`go.test.toggle`**            | Toggle test file                                   |
-| **`go.version`**                | Print extension version                            |
+| Key                              | Description             |
+|----------------------------------|-------------------------|
+| **`go.gopls.listKnownPackages`** | Gopls listKnownPackages |
+| **`go.goplsArgs`**               | GoplsArgs               |
+| **`go.goplsOptions`**            | GoplsOptions            |
+| **`go.goplsPath`**               | GoplsPath               |
+| **`go.goplsUseDaemon`**          | GoplsUseDaemon          |
 
 ### Examples
 
