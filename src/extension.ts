@@ -30,6 +30,7 @@ import {
   goplsListKnownPackages,
   goplsRunTests,
   goplsTidy,
+  setBufferPackageName,
 } from "./utils/lspcommands"
 import { addTags, clearTags, removeTags } from "./utils/modify-tags"
 import { openPlayground } from "./utils/playground"
@@ -39,7 +40,7 @@ import {
   generateTestsFunction,
   toogleTests,
 } from "./utils/tests"
-import { commandExists, goBinPath, installGoBin, runBin } from "./utils/tools"
+import { commandExists, goBinPath, installGoBin } from "./utils/tools"
 
 const restartConfigs = [
   "go.goplsArgs",
@@ -251,27 +252,8 @@ async function registerLspCommands(context: ExtensionContext): Promise<void> {
     workspace.registerAutocmd({
       event: ['BufEnter'],
       // request: true,
-      callback: async () => {
-        const pkg = await currentPackage()
-        const bufnr = await workspace.nvim.call('bufnr', ['%'])
-        const buffer = workspace.nvim.createBuffer(bufnr)
-        buffer.setVar('coc_current_package', pkg, true)
-        workspace.nvim.call('coc#util#do_autocmd', ['CocStatusChange'], true)
-      },
+      callback: setBufferPackageName,
     })
   )
 }
 
-async function currentPackage(): Promise<string> {
-  try {
-    await activeTextDocument()
-  } catch {
-    return ""
-  }
-  // TODO: preferrably use lsp to query, running `go list` is expensive
-  const fn = await workspace.nvim.call('expand', '%:p:h') as string
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  const [_, out] = await runBin('go', ['list', '-f', '{{.Name}}', fn])
-  // const [_, out] = await runBin('go', ['list', '-f', '{{.ImportPath}}', fn])
-  return (out as string).trim()
-}

@@ -1,7 +1,7 @@
 import path from 'path'
 import fs from 'fs'
 import util from 'util'
-import { ExecOptions, exec, execFile, spawn } from 'child_process'
+import { ExecOptions, SpawnOptionsWithoutStdio, exec, execFile, spawn } from 'child_process'
 import { window, workspace } from 'coc.nvim'
 import which from 'which'
 import { configDir } from './config'
@@ -51,7 +51,7 @@ async function goInstall(source: string): Promise<boolean> {
 async function goVersionOrLater(version: string): Promise<boolean> {
   try {
     return compareVersions(version, await getGoVersion()) < 0
-  } catch(err) {
+  } catch (err) {
     // mute
   }
 
@@ -62,7 +62,7 @@ async function getGoVersion() {
   try {
     const [, out] = await runBin('go', ['version'])
     return out.trim().match(/^go version go(\S+) .*$/)[1]
-  } catch(err) {
+  } catch (err) {
     // mute
   }
   return ''
@@ -77,9 +77,9 @@ export async function runGoTool(name: string, args: string[] = []): Promise<[num
   return runBin(await goBinPath(name), args)
 }
 
-export async function runBin(bin: string, args: string[] = []): Promise<[number, string]> {
+export async function runBin(bin: string, args: string[] = [], options?: SpawnOptionsWithoutStdio): Promise<[number, string]> {
   return new Promise((resolve): void => {
-    const p = spawn(bin, args)
+    const p = spawn(bin, args, options)
 
     let out = ""
     p.stdout.on('data', (data) => out += data)

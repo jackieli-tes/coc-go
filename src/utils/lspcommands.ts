@@ -9,6 +9,7 @@ import {
   workspace,
 } from "coc.nvim"
 import { activeTextDocument } from "../editor"
+import { runBin } from "./tools"
 
 export async function goplsTidy() {
   const doc = await workspace.document
@@ -22,19 +23,19 @@ export async function goplsRunTests() {
     return
   }
 
-  const { line } = await window.getCursorPosition()
-  const text = doc.getText({
-    start: { line, character: 0 },
-    end: { line, character: Infinity },
-  })
+  // const { line } = await window.getCursorPosition()
+  // const text = doc.getText({
+  //   start: { line, character: 0 },
+  //   end: { line, character: Infinity },
+  // })
 
-  const re = /^func\s+((Test|Benchmark)\w+)\s?\(/gm
-  const m = re.exec(text)
-  if (m && m[1]) {
-    window.showMessage(m[1])
-    await runGoplsTests(doc.uri, m[1])
-    return
-  }
+  // const re = /^func\s+((Test|Benchmark)\w+)\s?\(/gm
+  // const m = re.exec(text)
+  // if (m && m[1]) {
+  //   window.showMessage(m[1])
+  //   await runGoplsTests(doc.uri, m[1])
+  //   return
+  // }
   // if no function if found, put all functions to list so that user can choose what to execute
   workspace.nvim.command("CocList gotests", true)
 }
@@ -77,6 +78,7 @@ type CocDocumentSymbol = {
 
 type GoTestsData = {
   docUri: string
+  container: string
   tests: string[]
 }
 
@@ -100,24 +102,14 @@ export class GoTestsList implements IList {
       {
         name: "yank as go test",
         execute: async (item: GoTestsListItem) => {
-          const { tests } = item.data
+          const { tests, container } = item.data
           if (tests.length === 0) {
             return
           }
-          // hacky way to retrieve current package qualified name
-          const symbol: SymbolInformation[] = await workspace.nvim.call(
-            "CocAction",
-            ["getWorkspaceSymbols", `'${tests[0]}`]
-          )
-          if (symbol.length === 0) {
-            window.showMessage("can't retrieve go package for current file")
-            return
-          }
-          const pkg = symbol[0].containerName
-          const content = `go test ${pkg} -run '^${tests.join(
+          const content = `go test ${container} -run '^${tests.join(
             "|"
           )}$' -timeout 30s -v -count 1`
-          console.log(content)
+          // console.log(content)
           await workspace.nvim.command(`let @+ = "${content}"`, true)
           window.showMessage("yanked to + register")
         },
@@ -135,31 +127,66 @@ export class GoTestsList implements IList {
   }
 
   public async loadItems(context: ListContext): Promise<ListItem[]> {
-    // we would want to see all tests in the package current files is located
-    // however it's not support because of:
-    // https://github.com/golang/go/issues/37237
-    const symbols: CocDocumentSymbol[] = await workspace.nvim.call(
-      "CocAction",
-      ["documentSymbols", context.buffer.id]
-    )
-    const tests = symbols.filter(
-      (s) =>
-        s.kind === "Function" &&
-        (s.text.startsWith("Test") || s.text.startsWith("Benchmark"))
-    )
+    const pkg = await currentPackage()
+    const pkgSymbols: SymbolInformation[] = await Promise.all([
+      await workspace.nvim.call(
+        "CocAction",
+        ["getWorkspaceSymbols", `^${pkg}.Test`]
+      ),
+      await workspace.nvim.call(
+        "CocAction",
+        ["getWorkspaceSymbols", `^${pkg}.Benchmark`]
+      ),
+    ]).then(([t, b]) => t.concat(b))
+    let tests: string[]
+    let container: string
+    if (pkgSymbols.length !== 0) {
+      // SymbolKind.Function = 12
+      tests = pkgSymbols.filter(s => s.kind === 12).map(s => s.name.split(".")[1])
+      container = pkgSymbols[0].containerName
+      // window.showMessage("package symbols" + pkgSymbols.length)
+      // window.showMessage(JSON.stringify(pkgSymbols, null, 2))
+    } else {
+      // window.showMessage("doc symbols")
+      // we would want to see all tests in the package current files is located
+      // however it's not support because of:
+      // https://github.com/golang/go/issues/37237
+      const symbols: CocDocumentSymbol[] = await workspace.nvim.call(
+        "CocAction",
+        ["documentSymbols", context.buffer.id]
+      )
+      // window.showMessage("doc symbols" + symbols.length)
+      // window.showMessage(JSON.stringify(symbols.filter(s => s.text.startsWith("Test")), null, 2))
+      tests = symbols.filter(
+        (s) =>
+          s.kind === "Function" &&
+          (s.text.startsWith("Test") || s.text.startsWith("Benchmark"))
+      ).map(s => s.text)
+
+      // hacky way to retrieve current package qualified name
+      const symbol: SymbolInformation[] = await workspace.nvim.call(
+        "CocAction",
+        ["getWorkspaceSymbols", `'${pkg}.${tests[0]}`]
+      )
+      if (symbol.length !== 1) {
+        window.showMessage("can't retrieve full go package for current file")
+        return
+      }
+      container = symbol[0].containerName
+    }
     const doc = workspace.getDocument(context.buffer.id)
 
     const items = tests.map<GoTestsListItem>((t) => ({
-      label: t.text,
-      filterText: t.text,
-      data: { docUri: doc.uri, tests: [t.text] },
+      label: t,
+      filterText: t,
+      data: { docUri: doc.uri, tests: [t], container },
     }))
     if (tests.length > 1) {
       items.unshift({
         label: "all",
         filterText: "all",
         // we need to remember the docUri in case the list is resumed. At this point the doc would be a different one
-        data: { docUri: doc.uri, tests: tests.map((t) => t.text) },
+        data: { docUri: doc.uri, tests, container },
       })
     }
     return items
@@ -221,4 +248,26 @@ export class GoKnownPackagesList implements IList {
   public dispose() {
     console.debug("clearing goknownpackages list")
   }
+}
+
+export async function setBufferPackageName() {
+  const pkg = await currentPackage()
+  const bufnr = await workspace.nvim.call('bufnr', ['%'])
+  const buffer = workspace.nvim.createBuffer(bufnr)
+  buffer.setVar('coc_current_package', pkg, true)
+  workspace.nvim.call('coc#util#do_autocmd', ['CocStatusChange'], true)
+}
+
+async function currentPackage(): Promise<string> {
+  try {
+    await activeTextDocument()
+  } catch {
+    return ""
+  }
+  // TODO: preferrably use lsp to query, running `go list` is expensive
+  const fn = await workspace.nvim.call('expand', '%:p:h') as string
+  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  const [_, out] = await runBin('go', ['list', '-f', '{{.Name}}'], { cwd: fn })
+  // const [_, out] = await runBin('go', ['list', '-f', '{{.ImportPath}}', fn])
+  return (out as string).trim()
 }
