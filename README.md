@@ -1,3 +1,20 @@
+## **Fork of josa42/coc-go**
+
+This is my fork of the original [coc-go](https://github.com/josa42/coc-go). I added a few commands, mostly `go.gopls` ones.
+
+I try to say in sync with upstream. If any questions, please let me know.
+
+To install this, first uninstall original `CocUninstall coc-go`, and install this one with:
+
+```
+CocInstall https://github.com/jackielii/coc-go
+```
+
+**Original README Below**
+
+---
+
+
 # coc-go
 
 Go language server extension using [`gopls`](https://github.com/golang/go/wiki/gopls)
