@@ -115,6 +115,20 @@ export class GoTestsList implements IList {
         },
       },
       {
+        name: "AsyncRun",
+        execute: async (item: GoTestsListItem) => {
+          const { tests, container } = item.data
+          if (tests.length === 0) {
+            return
+          }
+          const content = `go test ${container} -run '^${tests.join(
+            "|"
+          )}$' -timeout 30s -v -count 1`
+          // console.log(content)
+          await workspace.nvim.command(`AsyncRun ${content}`, true)
+        },
+      },
+      {
         name: "yank test name",
         execute: async (item: GoTestsListItem) => {
           const { tests } = item.data
