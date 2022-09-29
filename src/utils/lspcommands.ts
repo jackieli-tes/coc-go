@@ -152,14 +152,11 @@ export class GoTestsList implements IList {
         ["getWorkspaceSymbols", `^${pkg}.Benchmark`]
       ),
     ]).then(([t, b]) => t.concat(b))
-    let tests: string[]
+    const thisPkgSymbols = pkgSymbols.filter(s => s.kind === 12)
+    let tests: string[] = thisPkgSymbols.map(s => s.name.split(".")[1])
     let container: string
-    if (pkgSymbols.length !== 0) {
-      // SymbolKind.Function = 12
-      tests = pkgSymbols.filter(s => s.kind === 12).map(s => s.name.split(".")[1])
-      container = pkgSymbols[0].containerName
-      // window.showMessage("package symbols" + pkgSymbols.length)
-      // window.showMessage(JSON.stringify(pkgSymbols, null, 2))
+    if (thisPkgSymbols.length !== 0) {
+      container = thisPkgSymbols[0].containerName
     } else {
       // window.showMessage("doc symbols")
       // we would want to see all tests in the package current files is located
