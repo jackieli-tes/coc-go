@@ -201,7 +201,7 @@ export class GoTestsList implements IList {
       data: { docUri: doc.uri, tests: [t], container },
     }))
     if (tests.length > 1) {
-      items.unshift({
+      items.push({
         label: "all",
         filterText: "all",
         // we need to remember the docUri in case the list is resumed. At this point the doc would be a different one
