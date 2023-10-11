@@ -10,6 +10,15 @@ To install this, first uninstall original `CocUninstall coc-go`, and install thi
 CocInstall https://github.com/jackielii/coc-go
 ```
 
+**Updates:**
+
+- Added CocCommand go.gopls.tidy
+- Added CocCommand go.gopls.runTests
+- Added CocCommand go.gopls.listKnownPackages
+- Added CocList gotests
+- Added CocList goknownpackages
+- Added dap config for running tests
+
 **Original README Below**
 
 ---

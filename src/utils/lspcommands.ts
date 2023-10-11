@@ -87,7 +87,7 @@ type GoTestsListItem = { data: GoTestsData } & Omit<ListItem, "data">
 export class GoTestsList implements IList {
   public readonly name = "gotests"
   public readonly description = "go tests & benchmarks in current file"
-  public readonly defaultAction = "run"
+  public readonly defaultAction = "debug test"
   public actions: ListAction[] = []
 
   constructor() {
@@ -135,6 +135,14 @@ export class GoTestsList implements IList {
           const content = tests.join(" ")
           await workspace.nvim.command(`let @+ = "${content}"`, true)
           window.showMessage("yanked to + register")
+        },
+      },
+      {
+        name: "debug test",
+        execute: async (item: GoTestsListItem) => {
+          const { tests, container } = item.data
+          const names = `^${tests.join("|")}$`
+          await workspace.nvim.command(`lua require('dap').run({ type = "go", name = "${tests.join(" ")}", request = "launch", mode = "test", program = "${container}", args = { "-test.run", "${names}" } })`)
         },
       }
     )
