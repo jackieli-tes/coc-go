@@ -66,6 +66,11 @@ export interface GoplsOptions {
   analyses: { string: boolean }
 
   /**
+   * Default: true
+   */
+  analysisProgressReporting: boolean
+
+  /**
    * Default: {}
    */
   annotations: { string: boolean }
@@ -79,6 +84,11 @@ export interface GoplsOptions {
    * Default: {}
    */
   codelenses: { string: boolean }
+
+  /**
+   * Default: true
+   */
+  completeFunctionCalls: boolean
 
   /**
    * Default: "100ms"
