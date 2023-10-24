@@ -106,9 +106,7 @@ export class GoTestsList implements IList {
           if (tests.length === 0) {
             return
           }
-          const content = `go test ${container} -run '^${tests.join(
-            "|"
-          )}$' -timeout 30s -v -count 1`
+          const content = goTestCommand(tests, container)
           // console.log(content)
           await workspace.nvim.command(`let @+ = "${content}"`, true)
           window.showMessage("yanked to + register")
@@ -121,9 +119,7 @@ export class GoTestsList implements IList {
           if (tests.length === 0) {
             return
           }
-          const content = `go test ${container} -run '^${tests.join(
-            "|"
-          )}$' -timeout 30s -v -count 1`
+          const content: string = goTestCommand(tests, container)
           // console.log(content)
           await workspace.nvim.command(`AsyncRun ${content}`, true)
         },
@@ -267,6 +263,24 @@ export class GoKnownPackagesList implements IList {
   public dispose() {
     console.debug("clearing goknownpackages list")
   }
+}
+
+function goTestCommand(tests: string[], container: string) {
+  let content: string
+  if (tests.length === 1) {
+    const test: string = tests[0]
+    console.log("test", test)
+    if (test.startsWith("Benchmark")) {
+      content = `go test ${container} -bench '^${test}$' -run XXX -timeout 30s -v -count 1`
+    } else {
+      content = `go test ${container} -run '^${test}$' -timeout 30s -v -count 1`
+    }
+  } else {
+    content = `go test ${container} -run '^${tests
+      .filter(t => t.startsWith("Test"))
+      .join("|")}$' -timeout 30s -v -count 1`
+  }
+  return content
 }
 
 export async function setBufferPackageName() {
