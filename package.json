@@ -240,6 +240,11 @@
                   "type": "boolean",
                   "description": "fieldalignment: find structs that would use less memory if their fields were sorted\nThis analyzer find structs that can be rearranged to use less memory, and provides\na suggested edit with the most compact order.\nNote that there are two different diagnostics reported. One checks struct size,\nand the other reports \"pointer bytes\" used. Pointer bytes is how many bytes of the\nobject that the garbage collector has to potentially scan for pointers, for example:\n\tstruct { uint32; string }\nhave 16 pointer bytes because the garbage collector has to scan up through the string's\ninner pointer.\n\tstruct { string; *uint32 }\nhas 24 pointer bytes because it has to scan further through the *uint32.\n\tstruct { string; uint32 }\nhas 8 because it can stop immediately after the string pointer.\nBe aware that the most compact order is not always the most efficient.\nIn rare cases it may cause two variables each updated by its own goroutine\nto occupy the same CPU cache line, inducing a form of memory contention\nknown as \"false sharing\" that slows down both goroutines.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/fieldalignment)\n**Disabled by default. Enable it by setting `\"analyses\": {\"fieldalignment\": true}`.**"
                 },
+                "fillreturns": {
+                  "type": "boolean",
+                  "description": "fillreturns: suggest fixes for errors due to an incorrect number of return values\nThis checker provides suggested fixes for type errors of the\ntype \"wrong number of return values (want %d, got %d)\". For example:\n\tfunc m() (int, string, *bool, error) {\n\t\treturn\n\t}\nwill turn into\n\tfunc m() (int, string, *bool, error) {\n\t\treturn 0, \"\", nil, nil\n\t}\nThis functionality is similar to https://github.com/sqs/goreturns.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/fillreturns)",
+                  "default": true
+                },
                 "httpresponse": {
                   "type": "boolean",
                   "description": "httpresponse: check for mistakes using HTTP responses\nA common mistake when using the net/http package is to defer a function\ncall to close the http.Response Body before checking the error that\ndetermines whether the response is valid:\n\tresp, err := http.Head(url)\n\tdefer resp.Body.Close()\n\tif err != nil {\n\t\tlog.Fatal(err)\n\t}\n\t// (defer statement belongs here)\nThis checker helps uncover latent nil dereference bugs by reporting a\ndiagnostic for such mistakes.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/httpresponse)",
@@ -248,6 +253,11 @@
                 "ifaceassert": {
                   "type": "boolean",
                   "description": "ifaceassert: detect impossible interface-to-interface type assertions\nThis checker flags type assertions v.(T) and corresponding type-switch cases\nin which the static type V of v is an interface that cannot possibly implement\nthe target interface T. This occurs when V and T contain methods with the same\nname but different signatures. Example:\n\tvar v interface {\n\t\tRead()\n\t}\n\t_ = v.(io.Reader)\nThe Read method in v has a different signature than the Read method in\nio.Reader, so this assertion cannot succeed.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/ifaceassert)",
+                  "default": true
+                },
+                "infertypeargs": {
+                  "type": "boolean",
+                  "description": "infertypeargs: check for unnecessary type arguments in call expressions\nExplicit type arguments may be omitted from call expressions if they can be\ninferred from function arguments, or from other type arguments:\n\tfunc f[T any](T) {}\n\t\n\tfunc _() {\n\t\tf[string](\"foo\") // string could be inferred\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/infertypeargs)",
                   "default": true
                 },
                 "loopclosure": {
@@ -268,6 +278,16 @@
                 "nilness": {
                   "type": "boolean",
                   "description": "nilness: check for redundant or impossible nil comparisons\nThe nilness checker inspects the control-flow graph of each function in\na package and reports nil pointer dereferences, degenerate nil\npointers, and panics with nil values. A degenerate comparison is of the form\nx==nil or x!=nil where x is statically known to be nil or non-nil. These are\noften a mistake, especially in control flow related to errors. Panics with nil\nvalues are checked because they are not detectable by\n\tif r := recover(); r != nil {\nThis check reports conditions such as:\n\tif f == nil { // impossible condition (f is a function)\n\t}\nand:\n\tp := &v\n\t...\n\tif p != nil { // tautological condition\n\t}\nand:\n\tif p == nil {\n\t\tprint(*p) // nil dereference\n\t}\nand:\n\tif p == nil {\n\t\tpanic(p)\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/nilness)",
+                  "default": true
+                },
+                "nonewvars": {
+                  "type": "boolean",
+                  "description": "nonewvars: suggested fixes for \"no new vars on left side of :=\"\nThis checker provides suggested fixes for type errors of the\ntype \"no new vars on left side of :=\". For example:\n\tz := 1\n\tz := 2\nwill turn into\n\tz := 1\n\tz = 2\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/nonewvars)",
+                  "default": true
+                },
+                "noresultvalues": {
+                  "type": "boolean",
+                  "description": "noresultvalues: suggested fixes for unexpected return values\nThis checker provides suggested fixes for type errors of the\ntype \"no result values expected\" or \"too many return values\".\nFor example:\n\tfunc z() { return nil }\nwill turn into\n\tfunc z() { return }\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/noresultvars)",
                   "default": true
                 },
                 "printf": {
@@ -324,6 +344,11 @@
                   "description": "structtag: check that struct field tags conform to reflect.StructTag.Get\nAlso report certain struct tags (json, xml) used with unexported fields.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/structtag)",
                   "default": true
                 },
+                "stubmethods": {
+                  "type": "boolean",
+                  "description": "stubmethods: detect missing methods and fix with stub implementations\nThis analyzer detects type-checking errors due to missing methods\nin assignments from concrete types to interface types, and offers\na suggested fix that will create a set of stub methods so that\nthe concrete type satisfies the interface.\nFor example, this function will not compile because the value\nNegativeErr{} does not implement the \"error\" interface:\n\tfunc sqrt(x float64) (float64, error) {\n\t\tif x < 0 {\n\t\t\treturn 0, NegativeErr{} // error: missing method\n\t\t}\n\t\t...\n\t}\n\ttype NegativeErr struct{}\nThis analyzer will suggest a fix to declare this method:\n\t// Error implements error.Error.\n\tfunc (NegativeErr) Error() string {\n\t\tpanic(\"unimplemented\")\n\t}\n(At least, it appears to behave that way, but technically it\ndoesn't use the SuggestedFix mechanism and the stub is created by\nlogic in gopls's source.stub function.)\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/stubmethods)",
+                  "default": true
+                },
                 "testinggoroutine": {
                   "type": "boolean",
                   "description": "testinggoroutine: report calls to (*testing.T).Fatal from goroutines started by a test\nFunctions that abruptly terminate a test, such as the Fatal, Fatalf, FailNow, and\nSkip{,f,Now} methods of *testing.T, must be called from the test goroutine itself.\nThis checker detects calls to these functions that occur within a goroutine\nstarted by the test. For example:\n\tfunc TestFoo(t *testing.T) {\n\t    go func() {\n\t        t.Fatal(\"oops\") // error: (*T).Fatal called from non-test goroutine\n\t    }()\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/testinggoroutine)",
@@ -337,6 +362,11 @@
                 "timeformat": {
                   "type": "boolean",
                   "description": "timeformat: check for calls of (time.Time).Format or time.Parse with 2006-02-01\nThe timeformat checker looks for time formats with the 2006-02-01 (yyyy-dd-mm)\nformat. Internationally, \"yyyy-dd-mm\" does not occur in common calendar date\nstandards, and so it is more likely that 2006-01-02 (yyyy-mm-dd) was intended.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/timeformat)",
+                  "default": true
+                },
+                "undeclaredname": {
+                  "type": "boolean",
+                  "description": "undeclaredname: suggested fixes for \"undeclared name: <>\"\nThis checker provides suggested fixes for type errors of the\ntype \"undeclared name: <>\". It will either insert a new statement,\nsuch as:\n\t<> :=\nor a new function declaration, such as:\n\tfunc <>(inferred parameters) {\n\t\tpanic(\"implement me!\")\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/undeclaredname)",
                   "default": true
                 },
                 "unmarshal": {
@@ -364,6 +394,10 @@
                   "description": "unusedresult: check for unused results of calls to some functions\nSome functions like fmt.Errorf return a result and have no side\neffects, so it is always a mistake to discard the result. Other\nfunctions may return an error that must not be ignored, or a cleanup\noperation that must be called. This analyzer reports calls to\nfunctions like these when the result of the call is ignored.\nThe set of functions may be controlled using flags.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/unusedresult)",
                   "default": true
                 },
+                "unusedvariable": {
+                  "type": "boolean",
+                  "description": "unusedvariable: check for unused variables and suggest fixes\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/unusedvariable)\n**Disabled by default. Enable it by setting `\"analyses\": {\"unusedvariable\": true}`.**"
+                },
                 "unusedwrite": {
                   "type": "boolean",
                   "description": "unusedwrite: checks for unused writes\nThe analyzer reports instances of writes to struct fields and\narrays that are never read. Specifically, when a struct object\nor an array is copied, its elements are copied implicitly by\nthe compiler, and any element write to this copy does nothing\nwith the original object.\nFor example:\n\ttype T struct { x int }\n\tfunc f(input []T) {\n\t\tfor i, v := range input {  // v is a copy\n\t\t\tv.x = i  // unused write to field x\n\t\t}\n\t}\nAnother example is about non-pointer receiver:\n\ttype T struct { x int }\n\tfunc (t T) f() {  // t is a copy\n\t\tt.x = i  // unused write to field x\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/unusedwrite)\n**Disabled by default. Enable it by setting `\"analyses\": {\"unusedwrite\": true}`.**"
@@ -371,45 +405,6 @@
                 "useany": {
                   "type": "boolean",
                   "description": "useany: check for constraints that could be simplified to \"any\"\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/useany)\n**Disabled by default. Enable it by setting `\"analyses\": {\"useany\": true}`.**"
-                },
-                "fillreturns": {
-                  "type": "boolean",
-                  "description": "fillreturns: suggest fixes for errors due to an incorrect number of return values\nThis checker provides suggested fixes for type errors of the\ntype \"wrong number of return values (want %d, got %d)\". For example:\n\tfunc m() (int, string, *bool, error) {\n\t\treturn\n\t}\nwill turn into\n\tfunc m() (int, string, *bool, error) {\n\t\treturn 0, \"\", nil, nil\n\t}\nThis functionality is similar to https://github.com/sqs/goreturns.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/fillreturns)",
-                  "default": true
-                },
-                "nonewvars": {
-                  "type": "boolean",
-                  "description": "nonewvars: suggested fixes for \"no new vars on left side of :=\"\nThis checker provides suggested fixes for type errors of the\ntype \"no new vars on left side of :=\". For example:\n\tz := 1\n\tz := 2\nwill turn into\n\tz := 1\n\tz = 2\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/nonewvars)",
-                  "default": true
-                },
-                "noresultvalues": {
-                  "type": "boolean",
-                  "description": "noresultvalues: suggested fixes for unexpected return values\nThis checker provides suggested fixes for type errors of the\ntype \"no result values expected\" or \"too many return values\".\nFor example:\n\tfunc z() { return nil }\nwill turn into\n\tfunc z() { return }\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/noresultvars)",
-                  "default": true
-                },
-                "undeclaredname": {
-                  "type": "boolean",
-                  "description": "undeclaredname: suggested fixes for \"undeclared name: <>\"\nThis checker provides suggested fixes for type errors of the\ntype \"undeclared name: <>\". It will either insert a new statement,\nsuch as:\n\t<> :=\nor a new function declaration, such as:\n\tfunc <>(inferred parameters) {\n\t\tpanic(\"implement me!\")\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/undeclaredname)",
-                  "default": true
-                },
-                "unusedvariable": {
-                  "type": "boolean",
-                  "description": "unusedvariable: check for unused variables and suggest fixes\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/unusedvariable)\n**Disabled by default. Enable it by setting `\"analyses\": {\"unusedvariable\": true}`.**"
-                },
-                "fillstruct": {
-                  "type": "boolean",
-                  "description": "fillstruct: note incomplete struct initializations\nThis analyzer provides diagnostics for any struct literals that do not have\nany fields initialized. Because the suggested fix for this analysis is\nexpensive to compute, callers should compute it separately, using the\nSuggestedFix function below.\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/fillstruct)",
-                  "default": true
-                },
-                "infertypeargs": {
-                  "type": "boolean",
-                  "description": "infertypeargs: check for unnecessary type arguments in call expressions\nExplicit type arguments may be omitted from call expressions if they can be\ninferred from function arguments, or from other type arguments:\n\tfunc f[T any](T) {}\n\t\n\tfunc _() {\n\t\tf[string](\"foo\") // string could be inferred\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/infertypeargs)",
-                  "default": true
-                },
-                "stubmethods": {
-                  "type": "boolean",
-                  "description": "stubmethods: detect missing methods and fix with stub implementations\nThis analyzer detects type-checking errors due to missing methods\nin assignments from concrete types to interface types, and offers\na suggested fix that will create a set of stub methods so that\nthe concrete type satisfies the interface.\nFor example, this function will not compile because the value\nNegativeErr{} does not implement the \"error\" interface:\n\tfunc sqrt(x float64) (float64, error) {\n\t\tif x < 0 {\n\t\t\treturn 0, NegativeErr{} // error: missing method\n\t\t}\n\t\t...\n\t}\n\ttype NegativeErr struct{}\nThis analyzer will suggest a fix to declare this method:\n\t// Error implements error.Error.\n\tfunc (NegativeErr) Error() string {\n\t\tpanic(\"unimplemented\")\n\t}\n(At least, it appears to behave that way, but technically it\ndoesn't use the SuggestedFix mechanism and the stub is created by\nlogic in gopls's source.stub function.)\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/gopls/internal/analysis/stubmethods)",
-                  "default": true
                 }
               }
             },
