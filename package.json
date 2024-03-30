@@ -405,7 +405,8 @@
                 },
                 "unusedwrite": {
                   "type": "boolean",
-                  "description": "unusedwrite: checks for unused writes\nThe analyzer reports instances of writes to struct fields and\narrays that are never read. Specifically, when a struct object\nor an array is copied, its elements are copied implicitly by\nthe compiler, and any element write to this copy does nothing\nwith the original object.\nFor example:\n\ttype T struct { x int }\n\tfunc f(input []T) {\n\t\tfor i, v := range input {  // v is a copy\n\t\t\tv.x = i  // unused write to field x\n\t\t}\n\t}\nAnother example is about non-pointer receiver:\n\ttype T struct { x int }\n\tfunc (t T) f() {  // t is a copy\n\t\tt.x = i  // unused write to field x\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/unusedwrite)\n**Disabled by default. Enable it by setting `\"analyses\": {\"unusedwrite\": true}`.**"
+                  "description": "unusedwrite: checks for unused writes\nThe analyzer reports instances of writes to struct fields and\narrays that are never read. Specifically, when a struct object\nor an array is copied, its elements are copied implicitly by\nthe compiler, and any element write to this copy does nothing\nwith the original object.\nFor example:\n\ttype T struct { x int }\n\tfunc f(input []T) {\n\t\tfor i, v := range input {  // v is a copy\n\t\t\tv.x = i  // unused write to field x\n\t\t}\n\t}\nAnother example is about non-pointer receiver:\n\ttype T struct { x int }\n\tfunc (t T) f() {  // t is a copy\n\t\tt.x = i  // unused write to field x\n\t}\n[Full documentation](https://pkg.go.dev/golang.org/x/tools/go/analysis/passes/unusedwrite)",
+                  "default": true
                 },
                 "useany": {
                   "type": "boolean",
