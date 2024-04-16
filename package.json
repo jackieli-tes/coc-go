@@ -627,7 +627,7 @@
                 "workspace"
               ],
               "default": "all",
-              "description": "symbolScope controls which packages are searched for workspace/symbol\nrequests. The default value, \"workspace\", searches only workspace\npackages. The legacy behavior, \"all\", causes all loaded packages to be\nsearched, including dependencies; this is more expensive and may return\nunwanted results.\n\nMust be one of:\n\n* `\"all\"` matches symbols in any loaded package, including\ndependencies.\n* `\"workspace\"` matches symbols in workspace packages only.\n"
+              "description": "symbolScope controls which packages are searched for workspace/symbol\nrequests. When the scope is \"workspace\", gopls searches only workspace\npackages. When the scope is \"all\", gopls searches all loaded packages,\nincluding dependencies and the standard library.\n\nMust be one of:\n\n* `\"all\"` matches symbols in any loaded package, including\ndependencies.\n* `\"workspace\"` matches symbols in workspace packages only.\n"
             },
             "symbolStyle": {
               "type": "string",
