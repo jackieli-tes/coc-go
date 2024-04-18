@@ -141,11 +141,6 @@
               "default": false,
               "description": "**This setting is experimental and may be deleted.**\n\nallowImplicitNetworkAccess disables GOPROXY=off, allowing implicit module\ndownloads rather than requiring user action. This option will eventually\nbe removed.\n"
             },
-            "allowModfileModifications": {
-              "type": "boolean",
-              "default": false,
-              "description": "**This setting is experimental and may be deleted.**\n\nallowModfileModifications disables -mod=readonly, allowing imports from\nout-of-scope modules. This option will eventually be removed.\n"
-            },
             "analyses": {
               "type": "object",
               "description": "analyses specify analyses that the user would like to enable or disable.\nA map of the names of analysis passes that should be enabled/disabled.\nA full list of analyzers that gopls uses can be found in\n[analyzers.md](https://github.com/golang/tools/blob/master/gopls/doc/analyzers.md).\n\nExample Usage:\n\n```json5\n...\n\"analyses\": {\n  \"unreachable\": false, // Disable the unreachable analyzer.\n  \"unusedvariable\": true  // Enable the unusedvariable analyzer.\n}\n...\n```\n",
@@ -594,8 +589,8 @@
             },
             "semanticTokens": {
               "type": "boolean",
-              "default": false,
-              "description": "**This setting is experimental and may be deleted.**\n\nsemanticTokens controls whether the LSP server will send\nsemantic tokens to the client.\n"
+              "default": true,
+              "description": "**This setting is experimental and may be deleted.**\n\nsemanticTokens controls whether the LSP server will send\nsemantic tokens to the client. If false, gopls will send empty semantic\ntokens.\n"
             },
             "standaloneTags": {
               "type": "array",

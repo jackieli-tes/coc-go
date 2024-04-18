@@ -56,11 +56,6 @@ export interface GoplsOptions {
   allowImplicitNetworkAccess: boolean
 
   /**
-   * Default: false
-   */
-  allowModfileModifications: boolean
-
-  /**
    * Default: {}
    */
   analyses: { string: boolean }
@@ -181,7 +176,7 @@ export interface GoplsOptions {
   noSemanticString: boolean
 
   /**
-   * Default: false
+   * Default: true
    */
   semanticTokens: boolean
 
